@@ -1,7 +1,7 @@
 const url = require('url');
 const http = require('http');
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');
 
 const server = new http.Server();
 
@@ -18,13 +18,11 @@ server.on('request', (req, res) => {
 
   switch (req.method) {
     case 'GET':
-      fs.readFile(filepath).then((file) => {
-        res.statusCode = 200;
-        res.end(file);
-      }).catch(() => {
-        res.statusCode = 404;
-        res.end('not found');
-      });
+      fs.createReadStream(filepath)
+          .on('error', () => {
+            res.statusCode = 404;
+            res.end('not found');
+          }).pipe(res);
       break;
 
     default:
